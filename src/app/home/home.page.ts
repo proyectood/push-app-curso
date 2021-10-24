@@ -10,6 +10,7 @@ import { PushService } from '../services/push.service';
 export class HomePage implements OnInit {
 
   mensajes: OSNotificationPayload[] = [];
+  userId: string;
   constructor(private pushService: PushService, private applicationRef: ApplicationRef) {}
 
   ngOnInit(){
@@ -20,13 +21,20 @@ export class HomePage implements OnInit {
       console.log(JSON.stringify( this.mensajes ));
       this.applicationRef.tick();
     });
-  }
+  }  
   
   async ionViewWillEnter(){
     console.log('Will Enter Invocada');
     this.mensajes = await this.pushService.getMensajes();
+    this.userId = this.pushService.getUserId();
     console.log(this.mensajes);
     console.log(JSON.stringify( this.mensajes ));
+
+  }
+
+  async borrarMensajes(){
+    await this.pushService.borrarMensajes();
+    this.mensajes = [];
   }
 
 }

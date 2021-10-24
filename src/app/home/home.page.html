@@ -3,6 +3,11 @@
     <ion-title>
       PushApp
     </ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="borrarMensajes()">
+        <ion-icon slot="icon-only" name="trash" color="danger"></ion-icon>
+      </ion-button>
+    </ion-buttons>
   </ion-toolbar>
 </ion-header>
 
@@ -12,6 +17,10 @@
 
     <ion-list-header>
       <ion-label>Pushes Recibidas</ion-label>
+    </ion-list-header>
+
+    <ion-list-header>
+      <ion-label>{{ userId }}</ion-label>
     </ion-list-header>
 
     <ion-item *ngFor="let push of mensajes">

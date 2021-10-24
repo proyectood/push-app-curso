@@ -10,6 +10,7 @@ export class PushService {
 
   key: string = "";
   value: string = "";
+  userId: string;
   mensajes: OSNotificationPayload[] = [];
 
   pushListener = new EventEmitter<OSNotificationPayload>();
@@ -33,15 +34,23 @@ export class PushService {
       console.log('Notificacion recibida:', noti);
       this.notificacionRecibida( noti );
     });
-    this.oneSignal.handleNotificationOpened().subscribe(( noti ) => {
+    this.oneSignal.handleNotificationOpened().subscribe( async( noti ) => {
       // do something when a notification is opened
       console.log('Notificacion abierta:', noti);
+      await this.notificacionRecibida(noti.notification);
+
     });
+
+    this.oneSignal.getIds().then( info => {
+      this.userId = info.userId;
+      console.log('UserId: ', this.userId);
+    });
+
     this.oneSignal.endInit();
   }
 
   async notificacionRecibida( noti: OSNotification ){
-    console.log('Notificdacion Recibida Invocada');
+    console.log('Notificacion Recibida Invocada');
     await this.cargarMensajes();
     const payload = noti.payload;
     const existePush = this.mensajes.find(mensaje => mensaje.notificationID === payload.notificationID);
@@ -50,18 +59,30 @@ export class PushService {
     }
     this.mensajes.unshift(payload);
     this.pushListener.emit(payload);
-    this.guardarMensajes();
+    await this.guardarMensajes();
   }
 
-  guardarMensajes(){
+  async guardarMensajes(){
     console.log('Guardar Mensajes Invocada');
-    Storage.set({key:'mensajes', value: JSON.stringify( this.mensajes )});
+    await Storage.set({key:'mensajes', value: JSON.stringify( this.mensajes )});
   }
 
   async cargarMensajes(){
     console.log('Cargar Mensajes Invocada');
     const resp = await Storage.get({key: 'mensajes'});
     this.mensajes = JSON.parse(resp.value) || [];
+    return this.mensajes;
+  }
+
+  getUserId(){
+    return this.userId;
+  }
+
+  borrarMensajes(){
+    Storage.clear();
+    this.mensajes = [];
+    this.guardarMensajes();
+    //Storage.remove();
   }
 
   // save(){
